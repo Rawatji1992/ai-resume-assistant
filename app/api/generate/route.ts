@@ -18,6 +18,7 @@ export async function POST(req: Request) {
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
+    // (Optional) Keep schema for prompting (model will still be asked to return JSON)
     const schema = {
       name: "TailoredApplication",
       schema: {
@@ -53,16 +54,20 @@ export async function POST(req: Request) {
       "JOB DESCRIPTION:",
       (jobDesc || '').slice(0, 60000),
       "",
-      "INSTRUCTIONS: Return JSON only, matching the provided schema. Use Markdown formatting for resume and cover letter (headers, bullet points). Include a concise LinkedIn About summary (3-6 lines)."
+      "INSTRUCTIONS:",
+      "Return **JSON only** that matches this schema keys: resume_markdown, cover_letter_markdown, linkedin_summary, key_skills, tweaks.",
+      "Use Markdown formatting for resume and cover letter (headers, bullet points).",
+      "Include a concise LinkedIn About summary (3-6 lines).",
+      "Do not include any text outside of a single JSON object."
     ].join("\n")
 
+    // ---- OpenAI call (no response_format) ----
     const resp = await client.responses.create({
       model: process.env.OPENAI_MODEL || "gpt-5-mini",
       input: [
         { role: "system", content: sys },
         { role: "user", content: prompt }
       ],
-      response_format: { type: "json_schema", json_schema: schema },
       temperature: 0.6
     })
 
@@ -80,12 +85,16 @@ export async function POST(req: Request) {
     try {
       data = JSON.parse(jsonText)
     } catch (e) {
+      // fallback: try to pull a JSON object substring
       const match = jsonText.match(/\{[\s\S]*\}/)
       if (match) data = JSON.parse(match[0])
       else throw e
     }
 
-    return new Response(JSON.stringify({ data }), { status: 200, headers: { "Content-Type": "application/json" } })
+    return new Response(JSON.stringify({ data }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    })
   } catch (err: any) {
     console.error(err)
     return new Response(JSON.stringify({ error: err?.message || "Server error" }), { status: 500 })
