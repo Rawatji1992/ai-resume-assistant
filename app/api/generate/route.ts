@@ -62,14 +62,13 @@ export async function POST(req: Request) {
     ].join("\n")
 
     // ---- OpenAI call (no response_format) ----
-    const resp = await client.responses.create({
-      model: process.env.OPENAI_MODEL || "gpt-5-mini",
-      input: [
-        { role: "system", content: sys },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.6
-    })
+   const resp = await client.responses.create({
+  model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+  input: [
+    { role: "system", content: sys },
+    { role: "user", content: prompt }
+  ]
+})
 
     // Robustly extract text from the Responses API output
     const jsonText =
