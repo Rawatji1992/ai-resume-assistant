@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { canUseToday, recordUse, remaining } from '@/lib/quota'
 import { saveAs } from 'file-saver'
+
 
 let mammoth: any = null
 let pdfjsLib: any = null
