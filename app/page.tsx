@@ -20,7 +20,10 @@ export default function Page() {
   const { register, handleSubmit, setValue } = useForm()
   const [status, setStatus] = useState<string>('')
   const [result, setResult] = useState<GenResult | null>(null)
-  const [limitLeft, setLimitLeft] = useState<number>(remaining())
+  const [limitLeft, setLimitLeft] = useState<number>(3) // default
+useEffect(() => {
+  setLimitLeft(remaining())
+}, [])
   const fileInputCv = useRef<HTMLInputElement>(null)
   const fileInputJd = useRef<HTMLInputElement>(null)
 
